@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 
 const OLLAMA_API_URL = 'http://localhost:11434/api/chat';
-const DEFAULT_MODEL = 'jakerains/jetson_ai_demo';
+const DEFAULT_MODEL = 'jakerains/jetsonv2';
 
 export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
