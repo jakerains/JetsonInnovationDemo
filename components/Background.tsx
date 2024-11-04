@@ -2,6 +2,14 @@
 
 export default function Background() {
   return (
-    <div className="fixed inset-0 overflow-hidden z-[-1] bg-gradient-to-br from-green-50 to-green-100" />
+    <div 
+      className="fixed inset-0 w-full h-full bg-black" 
+      style={{ 
+        zIndex: -1,
+        position: 'fixed',
+        pointerEvents: 'none',
+        background: 'linear-gradient(to bottom right, #000000, #111111, #000000)'
+      }} 
+    />
   );
 }

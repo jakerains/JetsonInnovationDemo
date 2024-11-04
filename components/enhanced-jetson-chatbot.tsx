@@ -237,10 +237,8 @@ export function EnhancedJetsonChatbotComponent() {
   const throttledHandleMouseMove = throttle(handleMouseMove, 100);
 
   return (
-    <div className="relative flex flex-col h-screen bg-gradient-radial from-gray-900 via-gray-800 to-black text-white overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Background />
-      </div>
+    <div className="relative flex flex-col h-screen text-white">
+      <Background />
       <div className="relative z-10 flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-4xl h-[80vh] glassmorphism rounded-xl shadow-lg overflow-hidden relative flex flex-col">
           {/* Header */}
