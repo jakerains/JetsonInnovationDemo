@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 
 const FloatingOrb = React.memo(({ color, size, x, y }: { color: string; size: number; x: string; y: string }) => {
   return (
@@ -21,7 +20,9 @@ const FloatingOrb = React.memo(({ color, size, x, y }: { color: string; size: nu
   );
 });
 
-export function Background() {
+FloatingOrb.displayName = 'FloatingOrb';
+
+export default function Background() {
   const orbs = [
     { color: 'rgba(118, 185, 0, 0.15)', size: 300, x: '10%', y: '20%' },
     { color: 'rgba(118, 185, 0, 0.1)', size: 200, x: '60%', y: '50%' },

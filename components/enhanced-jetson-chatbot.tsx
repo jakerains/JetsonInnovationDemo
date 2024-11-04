@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
-import { Background } from './Background'
+import Background from './Background'
 import { SendButton } from './SendButton' // Ensure SendButton is properly exported
 
 interface Message {
@@ -12,16 +12,19 @@ interface Message {
   sender: 'user' | 'bot'
 }
 
-const throttle = (func: Function, limit: number) => {
-  let inThrottle: boolean
-  return function(...args: any[]) {
+const throttle = <T extends (...args: Parameters<T>) => ReturnType<T>>(
+  func: T, 
+  limit: number
+): (...args: Parameters<T>) => void => {
+  let inThrottle: boolean;
+  return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
     if (!inThrottle) {
-      func.apply(this, args)
-      inThrottle = true
-      setTimeout(() => inThrottle = false, limit)
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
     }
-  }
-}
+  };
+};
 
 const AnimatedText = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState('')
@@ -119,7 +122,7 @@ export function EnhancedJetsonChatbotComponent() {
     }
   }, [isLoading])
 
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(async (): Promise<void> => {
     if (input.trim() && !isLoading) {
       setIsLoading(true);
       const userMessage: Message = { id: Date.now(), text: input.trim(), sender: 'user' };
@@ -203,9 +206,9 @@ export function EnhancedJetsonChatbotComponent() {
     }
   }, [input, messages, isLoading]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value)
-  }, [])
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+    setInput(e.target.value);
+  }, []);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading) {
@@ -221,18 +224,17 @@ export function EnhancedJetsonChatbotComponent() {
     setFontSize(prevSize => Math.max(12, Math.min(24, prevSize + increment)));
   };
 
-  const handleMouseMove = useCallback(
-    throttle((e: React.MouseEvent<HTMLDivElement>) => {
-      const container = inputContainerRef.current
-      const glowEffect = container?.querySelector('.mouse-glow-effect') as HTMLElement
-      if (container && glowEffect) {
-        const rect = container.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        glowEffect.style.left = `${x - 25}px`
-      }
-    }, 50), // Throttle to 50ms
-    []
-  )
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = inputContainerRef.current;
+    const glowEffect = container?.querySelector('.mouse-glow-effect') as HTMLElement;
+    if (container && glowEffect) {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      glowEffect.style.left = `${x - 25}px`;
+    }
+  }, [inputContainerRef]);
+
+  const throttledHandleMouseMove = throttle(handleMouseMove, 100);
 
   return (
     <div className="relative flex flex-col h-screen bg-gradient-radial from-gray-900 via-gray-800 to-black text-white overflow-hidden">
@@ -278,7 +280,7 @@ export function EnhancedJetsonChatbotComponent() {
               <div 
                 className="relative flex-1" 
                 ref={inputContainerRef}
-                onMouseMove={handleMouseMove}
+                onMouseMove={throttledHandleMouseMove}
                 onMouseEnter={() => {
                   const glowEffect = inputContainerRef.current?.querySelector('.mouse-glow-effect') as HTMLElement;
                   if (glowEffect) glowEffect.style.opacity = '1';
@@ -401,3 +403,5 @@ export function EnhancedJetsonChatbotComponent() {
     </div>
   )
 }
+
+EnhancedJetsonChatbotComponent.displayName = 'EnhancedJetsonChatbotComponent';

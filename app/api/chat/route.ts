@@ -1,16 +1,21 @@
-import { NextRequest } from 'next/server';
+
 
 const OLLAMA_API_URL = 'http://localhost:11434/api/chat';
 const DEFAULT_MODEL = 'jakerains/jetsonv2';
 
-export async function POST(req: NextRequest) {
+interface ChatMessage {
+  role: 'user' | 'bot';
+  text: string;
+}
+
+export async function POST(request: Request) {
   const encoder = new TextEncoder();
 
   try {
-    const { messages } = await req.json();
+    const { messages }: { messages: ChatMessage[] } = await request.json();
 
     // Format messages for Ollama API
-    const formattedMessages = messages.map((message: any) => ({
+    const formattedMessages = messages.map((message: ChatMessage) => ({
       role: message.role === 'bot' ? 'assistant' : message.role,
       content: message.text
     }));
@@ -21,7 +26,7 @@ export async function POST(req: NextRequest) {
       stream: true
     };
 
-    const response = await fetch(OLLAMA_API_URL, {
+    const response: Response = await fetch(OLLAMA_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -83,9 +88,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('Error in chat API:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to process chat request' }), 
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response('Internal Server Error', { status: 500 });
   }
 }
