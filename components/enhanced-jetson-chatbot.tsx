@@ -12,27 +12,55 @@ interface Message {
   sender: 'user' | 'bot'
 }
 
+const throttle = (func: Function, limit: number) => {
+  let inThrottle: boolean
+  return function(...args: any[]) {
+    if (!inThrottle) {
+      func.apply(this, args)
+      inThrottle = true
+      setTimeout(() => inThrottle = false, limit)
+    }
+  }
+}
+
 const AnimatedText = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState('')
+  const [shouldAnimate, setShouldAnimate] = useState(true)
 
   useEffect(() => {
+    if (!shouldAnimate) {
+      setDisplayedText(text)
+      return
+    }
+
     let i = 0
     const intervalId = setInterval(() => {
       setDisplayedText(text.slice(0, i))
-      i++
-      if (i > text.length) clearInterval(intervalId)
-    }, 20)
-    return () => clearInterval(intervalId)
-  }, [text])
+      i += 3 // Increase characters per tick
+      if (i > text.length) {
+        clearInterval(intervalId)
+        setDisplayedText(text)
+      }
+    }, 30) // Slower interval but more characters per tick
+
+    // Stop animation after 3 seconds to prevent performance issues
+    const timeoutId = setTimeout(() => {
+      clearInterval(intervalId)
+      setDisplayedText(text)
+      setShouldAnimate(false)
+    }, 3000)
+
+    return () => {
+      clearInterval(intervalId)
+      clearTimeout(timeoutId)
+    }
+  }, [text, shouldAnimate])
 
   return (
     <ReactMarkdown
       components={{
         p: ({ children }) => <p>{children}</p>,
-        strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-        em: ({ children }) => <em className="italic">{children}</em>,
         code: ({ children }) => <code className="bg-gray-800 rounded px-1">{children}</code>,
-        a: ({ href, children }) => <a href={href} className="text-blue-400 hover:underline">{children}</a>,
       }}
     >
       {displayedText}
@@ -193,16 +221,18 @@ export function EnhancedJetsonChatbotComponent() {
     setFontSize(prevSize => Math.max(12, Math.min(24, prevSize + increment)));
   };
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const container = inputContainerRef.current;
-    const glowEffect = container?.querySelector('.mouse-glow-effect') as HTMLElement;
-    
-    if (container && glowEffect) {
-      const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      glowEffect.style.left = `${x - 25}px`; // Center the 50px wide glow effect
-    }
-  }, []);
+  const handleMouseMove = useCallback(
+    throttle((e: React.MouseEvent<HTMLDivElement>) => {
+      const container = inputContainerRef.current
+      const glowEffect = container?.querySelector('.mouse-glow-effect') as HTMLElement
+      if (container && glowEffect) {
+        const rect = container.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        glowEffect.style.left = `${x - 25}px`
+      }
+    }, 50), // Throttle to 50ms
+    []
+  )
 
   return (
     <div className="relative flex flex-col h-screen bg-gradient-radial from-gray-900 via-gray-800 to-black text-white overflow-hidden">
@@ -350,6 +380,22 @@ export function EnhancedJetsonChatbotComponent() {
 
         .aurora-glow:hover + .aurora-glow-effect + .mouse-glow-effect {
           opacity: 1;
+        }
+
+        .aurora-glow:focus {
+          box-shadow: 0 0 10px #76B900;
+          transition: box-shadow 0.3s ease-in-out;
+        }
+
+        .mouse-glow-effect {
+          display: none;
+        }
+
+        @media (min-width: 768px) {
+          .aurora-glow:hover {
+            box-shadow: 0 0 10px #76B900;
+            transition: box-shadow 0.3s ease-in-out;
+          }
         }
       `}</style>
     </div>
