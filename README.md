@@ -3,11 +3,8 @@
 A modern, responsive AI chat interface powered by NVIDIA Jetson technology. This application provides a sleek, interactive chat experience with real-time message streaming and elegant UI animations.
 
 <p align="center">
-  <a href="/public/screenshot-full.png">
-    <img src="/public/screenshot-thumb.png" alt="Jetson AI Chat Interface" width="600"/>
-  </a>
+  <img src="/public/screenshot.png" alt="Jetson AI Chat Interface" width="600"/>
 </p>
-<!-- Add a caption below the screenshot if desired -->
 <p align="center">Jetson AI Chat Interface with real-time message streaming</p>
 
 ## Features
